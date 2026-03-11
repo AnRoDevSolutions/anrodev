@@ -38,21 +38,43 @@ const revealObserver = new IntersectionObserver(entries => {
 }, { threshold: 0.10, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-// ── Contact form ──
+// ── Contact form — Web3Forms handler ──
 const form = document.getElementById('contactForm');
 if (form) {
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    btn.textContent = 'Message Sent';
-    btn.style.background = '#16a34a';
+    const btn  = document.getElementById('submitBtn');
+    const note = document.getElementById('formNote');
+    btn.textContent = 'Sending...';
     btn.disabled = true;
-    setTimeout(() => {
-      btn.textContent = 'Send Message';
-      btn.style.background = '';
-      btn.disabled = false;
-      form.reset();
-    }, 3500);
+
+    const data = new FormData(form);
+    try {
+      const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        btn.textContent      = '✓ Message Sent!';
+        btn.style.background = '#16a34a';
+        note.textContent     = 'Thank you! We will get back to you within 24 hours.';
+        note.style.color     = '#16a34a';
+        form.reset();
+        setTimeout(() => {
+          btn.textContent      = 'Send Message';
+          btn.style.background = '';
+          btn.disabled         = false;
+          note.textContent     = 'Confidential — Institutional Use Only.';
+          note.style.color     = '';
+        }, 4000);
+      } else {
+        btn.textContent      = 'Failed — Try Again';
+        btn.style.background = '#dc2626';
+        btn.disabled         = false;
+      }
+    } catch {
+      btn.textContent      = 'Failed — Try Again';
+      btn.style.background = '#dc2626';
+      btn.disabled         = false;
+    }
   });
 }
 
@@ -87,11 +109,7 @@ if (form) {
 
 
 // ════════════════════════════════════════════════════════
-//   HERO CANVAS — ribbon waves matching section style
-//   Same flowing ribbon bundles as Services/Why/Products
-//   but with white as the dominant colour, a subtle red
-//   accent ribbon woven through, and a faint blue-teal
-//   secondary. Slow speed matches section canvases.
+//   HERO CANVAS — ribbon waves
 // ════════════════════════════════════════════════════════
 (function initHeroCanvas() {
   const canvas = document.getElementById('heroCanvas');
@@ -121,18 +139,15 @@ if (form) {
   function resize() {
     W = canvas.width  = canvas.offsetWidth;
     H = canvas.height = canvas.offsetHeight;
-    // Invalidate pinch cache so ribbons recalculate for new dimensions
     RIBBONS.forEach(rb => { rb._pinches = null; });
   }
 
   function drawRibbon(rb) {
-    // Scale amplitudes relative to the smaller of W/H so mobile looks the same
     const ref  = Math.min(W, H);
     const amp1 = rb.amp1 * ref;
     const amp2 = rb.amp2 * ref;
     const [r, g, b] = rb.color;
 
-    // 2–3 random pinch points per ribbon (recreated on resize only)
     if (!rb._pinches) {
       const pinchCount = 2 + Math.floor(Math.random() * 2);
       rb._pinches = Array.from({ length: pinchCount }, () => ({
@@ -153,30 +168,23 @@ if (form) {
       const linePhase = li * 0.13;
       const spd       = t * rb.speed;
 
-      // Set strokeStyle and lineWidth ONCE before the path
       ctx.beginPath();
       ctx.strokeStyle = `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
       ctx.lineWidth   = 0.35 + bright * 0.65;
 
       for (let x = 0; x <= W; x += 3) {
         const nx = x / W;
-
-        // Pinch envelope — narrows spread at pinch points
         let envelope = 1.0;
         for (const p of pinches) {
           const d = Math.abs(nx - p.cx) / p.w;
           envelope *= 1 - p.str * Math.exp(-d * d * 3.5);
         }
-
-      // Spread scales off height; freq scales off width so waves don't compress on mobile
-      const spread = rb.spread * H * envelope;
-      const yOff   = (frac - 0.5) * spread;
-      // Reduce frequency on narrow screens so waves stay open, not cramped
-      const freqScale = Math.min(1, W / 900);
-      const y = rb.yBase * H + yOff
-        + Math.sin(nx * Math.PI * 2 * rb.freq1 * freqScale + spd + rb.phase1 + linePhase) * amp1
-        + Math.sin(nx * Math.PI * 2 * rb.freq2 * freqScale - spd * 0.65 + rb.phase2 + linePhase * 0.5) * amp2;
-
+        const spread    = rb.spread * H * envelope;
+        const yOff      = (frac - 0.5) * spread;
+        const freqScale = Math.min(1, W / 900);
+        const y = rb.yBase * H + yOff
+          + Math.sin(nx * Math.PI * 2 * rb.freq1 * freqScale + spd + rb.phase1 + linePhase) * amp1
+          + Math.sin(nx * Math.PI * 2 * rb.freq2 * freqScale - spd * 0.65 + rb.phase2 + linePhase * 0.5) * amp2;
         x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
       ctx.stroke();
@@ -197,8 +205,7 @@ if (form) {
 
 
 // ════════════════════════════════════════════════════════
-//   LIGHT PLEXUS FACTORY — for Solutions & Contact
-//   White background, dark grey nodes & lines (Image 2)
+//   LIGHT PLEXUS FACTORY — Solutions & Contact
 // ════════════════════════════════════════════════════════
 function createLightPlexus(canvasId) {
   const canvas = document.getElementById(canvasId);
@@ -208,7 +215,7 @@ function createLightPlexus(canvasId) {
 
   const NODE_COUNT   = 55;
   const CONNECT_DIST = 0.22;
-  const SPEED        = 0.00015; // very slow
+  const SPEED        = 0.00015;
 
   function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; buildNodes(); }
 
