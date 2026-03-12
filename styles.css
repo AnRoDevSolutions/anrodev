@@ -69,13 +69,13 @@ a { text-decoration: none; color: inherit; }
 .logo-text { font-family:var(--fh); font-size:20px; font-weight:800; color:var(--white); letter-spacing:1.5px; line-height:1; }
 .logo-accent { color:var(--blue-hi); }
 .nav-logo {
-  width: 52px;
-  height: 52px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
   filter: drop-shadow(0 2px 8px rgba(80,180,255,0.30));
 }
-.navbar.scrolled .nav-logo { width:44px; height:44px; }
+.navbar.scrolled .nav-logo { width:60px; height:60px; }
 .nav-links { display:flex; align-items:center; gap:4px; }
 .nav-links a { font-size:14px; font-weight:500; color:rgba(255,255,255,0.65); padding:7px 14px; border-radius:8px; transition:color var(--t),background var(--t); }
 .nav-links a:hover { color:white; background:rgba(255,255,255,0.07); }
