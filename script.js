@@ -80,18 +80,19 @@ if (form) {
 const sections = document.querySelectorAll('section[id]');
 const navAnchors = document.querySelectorAll('.nav-links a');
 
-const sectionObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.getAttribute('id');
-      navAnchors.forEach(a => {
-        a.classList.toggle('nav-active', a.getAttribute('href') === '#' + id);
-      });
-    }
+function setActiveNav() {
+  let current = '';
+  sections.forEach(s => {
+    const top = s.getBoundingClientRect().top;
+    if (top <= 120) current = s.getAttribute('id');
   });
-}, { threshold: 0.35 });
+  navAnchors.forEach(a => {
+    a.classList.toggle('nav-active', a.getAttribute('href') === '#' + current);
+  });
+}
 
-sections.forEach(s => sectionObserver.observe(s));
+window.addEventListener('scroll', setActiveNav, { passive: true });
+setActiveNav(); // run on load too
 
 // ── Typing effect ──
 (function initTyping() {
